@@ -12,7 +12,7 @@ test_dataset = datasets.MNIST(
 )
 
 # Select an image (change the index as needed)
-index = 641
+index = 420
 image, label = test_dataset[index]
 
 print("True Label:", label)
@@ -26,8 +26,50 @@ for i in pix:
         img.append("1")
     else:
         img.append("0")
+print(''.join(img))
+
+def bits_to_bytes(bits):
+    """
+    bits: list of 784 strings ('0'/'1')
+    returns: list of 98 bytes
+    """
+
+    assert len(bits) == 784
+
+    image = []
+
+    for i in range(0, 784, 8):
+
+        byte = 0
+
+        for b in bits[i:i+8]:
+            byte = (byte << 1) | int(b)
+
+        image.append(byte)
+
+    return image
 
 
+def print_c_array(image):
+
+    print("u8 image[98] =")
+    print("{")
+
+    for i in range(0,98,8):
+
+        row = ", ".join(f"0x{x:02X}" for x in image[i:i+8])
+
+        if i < 96:
+            print(f"    {row},")
+        else:
+            print(f"    {row}")
+
+    print("};")
+
+
+image = bits_to_bytes(img)
+
+print_c_array(image)
 wt1=[]
 layer2=[]
 with open("fc1_binary.txt", "r") as f:
@@ -41,7 +83,7 @@ with open("fc1_binary.txt", "r") as f:
                 #print("weights",wt1[0:10])
                 for i in range(len(wt1)):
                     arr.append(int(wt1[i]==img[i]))
-                #print("xnor result",arr[0:10])
+                #print("xnor result",arr)
                 pcount = 0
                 for j in range(len(arr)):
                     pcount+=arr[j]
@@ -60,12 +102,12 @@ with open("fc1_binary.txt", "r") as f:
                         layer2.append("0")
 
 #print(len(layer2))
-#print(layer2[0:10])
+#print(layer2)
 #print(len(img))
 #print("image",img[0:10])
 #print("layer2",layer2)
 #print(len(layer2))
-
+#signed [$clog2(2*WIDTH+1)-1:0]
 wt2=[]
 layer3=[]
 with open("fc2_binary.txt", "r") as file:
@@ -96,7 +138,7 @@ with open("fc2_binary.txt", "r") as file:
                         layer3.append("1")
                     else:
                         layer3.append("0")
-
+#print(layer3)
 wt3=[]
 layer4=[]
 with open("fc3_binary.txt", "r") as f:
@@ -115,8 +157,8 @@ with open("fc3_binary.txt", "r") as f:
         #print("prod",prod)
         layer4.append(prod)
 
-print(len(layer4))
-print(layer4)
+#print(len(layer4))
+#print(layer4)
 print("predicted output",layer4.index(max(layer4)))
 #print(len(layer3))
 #print(layer3[0:10])
