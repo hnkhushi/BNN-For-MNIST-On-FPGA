@@ -37,5 +37,53 @@ module bnn_top_module(input clk,rst,input [7:0] gpio_data,input byte_valid,outpu
     top_module t1(clk,rst,start_pulse,image_vector,final_out,consume,done2,final_done);
     assign bcd_pins = final_out;
     assign bnn_done=final_done;
+    reg [31:0] cycle_counter;
+    reg        measuring;
 
+    reg [31:0] inference_cycles_reg;
+
+    assign inference_cycles = inference_cycles_reg;
+
+
+    always @(posedge clk) begin
+
+        if (rst) begin
+
+            cycle_counter       <= 32'd0;
+            inference_cycles_reg <= 32'd0;
+            measuring           <= 1'b0;
+
+        end
+
+        else begin
+
+            if (start_pulse && !measuring) begin
+
+                measuring     <= 1'b1;
+                cycle_counter <= 32'd0;
+
+            end
+-
+
+            else if (measuring) begin
+
+                if (final_done) begin
+
+                    inference_cycles_reg <= cycle_counter + 1'b1;
+
+                    measuring <= 1'b0;
+
+                end
+
+                else begin
+
+                    cycle_counter <= cycle_counter + 1'b1;
+
+                end
+
+            end
+
+        end
+
+    end
 endmodule
