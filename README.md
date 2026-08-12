@@ -1,4 +1,4 @@
-# MNIST Binary Neural Network Accelerator on Arty A7
+# MNIST Binary Neural Network Accelerator on FPGA
 
 A hardware-accelerated Binary Neural Network (BNN) for MNIST digit classification, implemented on the **Digilent Arty A7-100T FPGA** using **Verilog, Vivado, Vitis, MicroBlaze, AXI peripherals, and Python**.
 
@@ -207,7 +207,7 @@ Hand Draw digits.
 
 ---
 
-## 📊 Vivado Block Design
+## Vivado Block Design
 
 <!-- Add your Vivado block design screenshot here -->
 
@@ -246,6 +246,40 @@ The BNN operates at 50 MHz to provide timing margin for the XNOR/popcount datapa
 
 ![Timing Report](images/Timing_Summary.jpg)
 
+**Timing Comparison of Python vs FPGA Hardware acceleration**
+
+The FPGA implementation took ~10.5 us per inference as opposed to 90-95 ms per inference in Python.
+
+The time taken by the RTL only is calculated by keeping count of the clock cycles from the start pulse until the bnn_done signal goes high which means the prediction is complete. So this includes all the connected layers of the neural network and does not include the time taken for image input or UART overhead.
+
+Similarly, the Python time per inference does not include the reading of text files for weights, thresholds and only includes the time required for fully connected layers of the network from starting of the inference till the prediction output.
+
+The RTL time is calculated as 
+```text
+Time per inference = Number of cycles x Time period of each cycle
+```
+BNN runs on 50 MHz clock. So the time period of each cycle is 20 ns.
+```text
+Time per inference = 528 x 20 ns = 10.56 us
+```
+
+Python time is calculated using the "time" library.
+
+![ILA](images/ila1.jpg)
+
+![Py_Time](images/python_time.jpg)
+
+```text
+FPGA Latency                      = 10.56 us
+Python Latency                    = 95 ms
+
+Latency speedup                   ≈ 8,996×
+Latency reduction                 ≈ 99.989%
+
+FPGA theoretical throughput       ≈ 94.7k inferences/s
+Python theoretical throughput     ≈ 10.53 inferences/s
+```
+
 ---
 
 ## Power & Utilization
@@ -257,7 +291,7 @@ The following are the Power and Utilization reports of the design
 ![Utilization Report](images/Utilisation_Report.jpg)
 
 ---
-## 📈 Accuracy
+## Accuracy
 
 The Python reference implementation achieved approximately:
 
@@ -271,8 +305,8 @@ The current FPGA implementation achieves approximately:
 ~78% MNIST test accuracy
 ```
 
-The complete hardware inference and PC ↔ FPGA communication pipeline is functional.
-Working towards increasing the accuracy of the FPGA implementation.
+Working towards improving the accuracy of the system.
+
 ---
 
 
@@ -280,7 +314,7 @@ Working towards increasing the accuracy of the FPGA implementation.
 
 <!-- Add your Arty A7 hardware photograph here -->
 
-![Arty A7 Hardware Setup](docs/images/hardware_setup.jpg)
+![Arty A7 Hardware Setup](images/Hardware.jfif)
 
 ---
 
